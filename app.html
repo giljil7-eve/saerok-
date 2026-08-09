@@ -166,9 +166,26 @@ input[type="date"]::-webkit-calendar-picker-indicator,input[type="time"]::-webki
 .summary-box{background:var(--input-bg);border:1.5px solid var(--border);border-radius:10px;padding:16px;font-size:0.83rem;color:var(--text);white-space:pre-line;line-height:1.7}
 .footer-credit{text-align:center;padding:24px 16px 16px;font-size:0.73rem;color:var(--text-sub);line-height:1.6;opacity:0.8}
 @media(max-width:480px){.tab-content{padding:10px 12px 40px}.card{padding:16px}.tab-nav{padding:10px 12px 6px}}
+  /* 인앱 브라우저 안내 / 임시저장 안내 */
+  .env-notice{margin:10px auto 0;max-width:520px;background:#fff6e0;border:1px solid #f0d9a0;
+    border-radius:12px;padding:12px 14px;font-size:0.84rem;line-height:1.55;color:#6b5426}
+  .env-notice strong{display:block;margin-bottom:4px;font-size:0.88rem;color:#5a4415}
+  .env-notice .env-close{margin-top:8px;background:none;border:1px solid #e0cb95;border-radius:8px;
+    padding:5px 10px;font-size:0.78rem;color:#6b5426;cursor:pointer}
+  .draft-notice{background:#eef5e8;border:1px solid #cfe0c0;border-radius:12px;padding:12px 14px;
+    margin-bottom:12px;font-size:0.84rem;line-height:1.55;color:#41563a}
+  .draft-notice .draft-actions{margin-top:8px;display:flex;gap:8px}
+  .draft-notice button{border-radius:8px;padding:6px 12px;font-size:0.8rem;cursor:pointer;border:1px solid #b9cfa8}
+  .draft-notice .draft-keep{background:#5c8a4d;color:#fff;border-color:#5c8a4d}
+  .draft-notice .draft-drop{background:#fff;color:#5f6b58}
 </style>
 </head>
 <body>
+<div id="env-notice" class="env-notice" style="display:none">
+  <strong>다른 브라우저에서 열어 주세요</strong>
+  <span id="env-notice-body"></span>
+  <button type="button" class="env-close" onclick="dismissEnvNotice()">알겠어요, 이대로 볼게요</button>
+</div>
 <div id="lock-setup" class="lock-screen hidden">
   <h1>사라지지 않는 기록</h1>
   <p class="subtitle">겪은 일을 잃어버리지 않기 위한 기록</p>
@@ -357,6 +374,44 @@ async function resetPassword(){
 }
 function enterApp(){showOnly('app');renderRecord();renderTimeline();renderSummary()}
 function lockApp(){showOnly('lock-login');$('login-pw').value='';$('login-error').style.display='none'}
+
+// --- 인앱 브라우저 감지 ---
+// 카카오톡, 인스타그램 등 앱 안에서 열린 화면은 저장 공간이 따로 분리돼서
+// 나중에 크롬이나 사파리로 같은 주소를 열면 기록이 보이지 않는다.
+function detectInAppBrowser(){
+  const ua=navigator.userAgent||'';
+  const list=[
+    [/KAKAOTALK/i,'카카오톡'],[/NAVER\(inapp/i,'네이버 앱'],[/DaumApps/i,'다음 앱'],
+    [/Instagram/i,'인스타그램'],[/FBAN|FBAV|FB_IAB/i,'페이스북'],[/Line\//i,'라인'],
+    [/everytimeApp/i,'에브리타임'],[/BAND\//i,'밴드'],[/Snapchat/i,'스냅챗'],[/TikTok/i,'틱톡']
+  ];
+  for(const [re,name] of list){if(re.test(ua))return name}
+  return null;
+}
+function showEnvNoticeIfNeeded(){
+  try{if(localStorage.getItem('saferecord_env_ack')==='1')return}catch{}
+  const app=detectInAppBrowser();
+  if(!app)return;
+  $('env-notice-body').textContent=
+    '지금 이 화면은 '+app+' 안에서 열렸습니다. 이렇게 열면 기록이 '+app+' 전용 공간에 저장되어, '+
+    '나중에 크롬이나 사파리로 같은 주소를 열었을 때 기록이 보이지 않습니다. 백업 파일 저장도 되지 않을 수 있습니다. '+
+    '오른쪽 위 메뉴에서 "다른 브라우저로 열기"를 선택한 뒤 사용해 주세요.';
+  $('env-notice').style.display='block';
+}
+function dismissEnvNotice(){
+  try{localStorage.setItem('saferecord_env_ack','1')}catch{}
+  $('env-notice').style.display='none';
+}
+
+// --- 화면이 가려지면 자동 잠금 ---
+// 폰 화면을 끄거나 다른 앱으로 넘어가는 것이 급할 때 가장 흔한 동작이므로,
+// 화면에서 벗어나는 시점에 쓰던 내용을 임시저장하고 잠근다.
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='hidden')return;
+  if($('app').classList.contains('hidden'))return;
+  try{collectCurrentStep();saveDraft()}catch{}
+  lockApp();
+});
 function switchTab(name){
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -374,7 +429,40 @@ function switchTab(name){
 const EMOTIONS=['무서웠다','화가 났다','슬펐다','억울했다','창피했다','불안했다','혼란스러웠다','무기력했다','외로웠다','아무것도 느끼지 못했다'];
 const BODY_REACTIONS=['심장이 빨리 뛰었다','손이 떨렸다','울었다','배가 아팠다','머리가 아팠다','숨이 막혔다','잠을 못 잤다','밥을 못 먹었다','몸이 굳었다','아무 반응 없었다'];
 const EVIDENCE_OPTIONS=['캡처/스크린샷 있음','사진 있음','녹음 있음','메시지/채팅 있음','목격자 있음','없음','기타'];
-let funnelStep=0,funnelData={},funnelEditIdx=-1;
+let funnelStep=0,funnelData={},funnelEditIdx=-1,draftRestored=false;
+const DRAFT_KEY='saferecord_draft';
+
+// --- 작성 중 임시저장 ---
+// 잠기거나 새로고침돼도 쓰던 내용이 사라지지 않게 한다.
+// 새 기록을 쓰는 중에만 저장하고, 기존 기록을 수정 중일 때는 저장하지 않는다.
+function saveDraft(){
+  if(funnelEditIdx>=0)return;
+  if(funnelStep<1||funnelStep>4)return;
+  const d=funnelData;
+  const hasContent=(d.event||'').trim()||(d.place||'').trim()||(d.person||'').trim()||
+    (d.witness||'').trim()||(d.help||'').trim()||(d.showTo||'').trim()||
+    (d.emotions&&d.emotions.length)||(d.body&&d.body.length)||(d.time||'');
+  if(!hasContent)return;
+  try{localStorage.setItem(DRAFT_KEY,JSON.stringify({step:funnelStep,data:d,savedAt:new Date().toISOString()}))}catch{}
+}
+function loadDraft(){try{return JSON.parse(localStorage.getItem(DRAFT_KEY))}catch{return null}}
+function clearDraft(){try{localStorage.removeItem(DRAFT_KEY)}catch{}}
+function draftNoticeHTML(){
+  const dr=loadDraft();
+  if(!dr||draftRestored)return '';
+  return `<div class="draft-notice">쓰다가 멈춘 기록이 남아 있어. 이어서 써도 되고, 지우고 새로 시작해도 돼.
+    <div class="draft-actions">
+      <button type="button" class="draft-keep" onclick="resumeDraft()">이어서 쓰기</button>
+      <button type="button" class="draft-drop" onclick="discardDraft()">지우고 새로 쓰기</button>
+    </div></div>`;
+}
+function resumeDraft(){
+  const dr=loadDraft();
+  if(!dr){renderStep();return}
+  funnelData={...dr.data};funnelStep=dr.step||1;funnelEditIdx=-1;draftRestored=true;
+  renderStep();
+}
+function discardDraft(){clearDraft();draftRestored=true;renderStep()}
 
 function renderRecord(editData,editIdx){
   if(editData!==undefined){funnelData={...editData};funnelEditIdx=editIdx;funnelStep=1;}
@@ -400,7 +488,7 @@ function renderStep(){
   const indicator=funnelStep>=1?`<div class="step-indicator">${dots}<span class="step-counter">${funnelStep} / 5</span></div>`:'';
   let html='';
   if(funnelStep===0){
-    html=`<div class="card" style="border-left:4px solid var(--accent)">
+    html=draftNoticeHTML()+`<div class="card" style="border-left:4px solid var(--accent)">
       <div class="onboard-title"><h2>사라지지 않는 기록</h2><p>겪은 일을 잃어버리지 않기 위한 기록</p></div>
       <div class="mascot-intro"><img src="새록5_품은.png" alt="기록을 지켜주는 새록"></div>
       <div class="onboard-desc">사라지지 않는 기록은 신고앱이 아니라 기록용 앱이야.<br>처음엔 애매하게 느껴지는 괴롭힘도,<br>반복되면 흐름이 보일 수 있어.<br>네가 겪은 일을 날짜별로 남기고,<br>필요할 때 도움을 요청할 준비를 도와줘.</div>
@@ -471,7 +559,15 @@ function renderStep(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function toggleChip(el){el.classList.toggle('selected')}
+function toggleChip(el){el.classList.toggle('selected');collectCurrentStep();saveDraft()}
+
+// 입력 중에도 잠깐씩 임시저장한다 (타이핑마다 저장하지 않도록 잠시 모아서 처리)
+let draftTimer=null;
+document.addEventListener('input',function(e){
+  if(!e.target.closest||!e.target.closest('#panel-record'))return;
+  clearTimeout(draftTimer);
+  draftTimer=setTimeout(function(){collectCurrentStep();saveDraft()},600);
+});
 document.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('chip')){e.preventDefault();toggleChip(e.target)}});
 function getSelectedChips(id){return Array.from(document.querySelectorAll('#'+id+' .chip.selected')).map(c=>c.textContent)}
 function collectCurrentStep(){
@@ -481,8 +577,8 @@ function collectCurrentStep(){
   else if(funnelStep===3){d.emotions=getSelectedChips('f-emotions');d.body=getSelectedChips('f-body')}
   else if(funnelStep===4){const he=document.getElementById('f-help'),sh=document.getElementById('f-showto');if(he)d.help=he.value.trim();if(sh)d.showTo=sh.value.trim()}
 }
-function nextStep(){collectCurrentStep();if(funnelStep===1&&!funnelData.date){alert('날짜를 선택해줘.');return}if(funnelStep===2&&!funnelData.event){alert('있었던 일을 적어줘. 짧아도 괜찮아.');return}funnelStep++;renderStep()}
-function prevStep(){collectCurrentStep();funnelStep--;renderStep()}
+function nextStep(){collectCurrentStep();if(funnelStep===1&&!funnelData.date){alert('날짜를 선택해줘.');return}if(funnelStep===2&&!funnelData.event){alert('있었던 일을 적어줘. 짧아도 괜찮아.');return}funnelStep++;saveDraft();renderStep()}
+function prevStep(){collectCurrentStep();funnelStep--;saveDraft();renderStep()}
 function saveFunnel(){
   const d=funnelData;const now=new Date().toISOString();
   const record={date:d.date,time:d.time,place:d.place,event:d.event,person:d.person,witness:d.witness,evidence:d.evidence,emotions:d.emotions,body:d.body,help:d.help,showTo:d.showTo,id:Date.now()};
@@ -498,6 +594,7 @@ function saveFunnel(){
     records.push(record);
   }
   if(!saveRecords(records))return;
+  clearDraft();draftRestored=true;
   alert(funnelEditIdx>=0?'수정 완료!':'기록이 안전하게 저장되었어.');
   funnelStep=0;funnelData={date:new Date().toISOString().slice(0,10),time:'',place:'',event:'',person:'',witness:'',evidence:'없음',emotions:[],body:[],help:'',showTo:''};funnelEditIdx=-1;renderStep();
 }
@@ -579,7 +676,7 @@ function renderSummary(){
     <div class="card"><h3>🫀 몸의 반응</h3>${topBody.length?topBody.map(([b,c])=>`<div class="stat-row"><span class="stat-label">${esc(b)}</span><span class="stat-value">${c}회</span></div>`).join(''):'<p style="font-size:0.83rem;color:var(--text-sub)">아직 데이터가 부족해.</p>'}</div>
     <div class="card"><h3>📋 도움 요청용 요약문</h3><div class="summary-box" id="summary-text">${esc(summaryText)}</div><p style="font-size:0.78rem;color:var(--text-sub);margin-top:10px;line-height:1.5">관련 사람을 별칭으로 적었다면, 요약문을 보여줄 때 누구를 뜻하는지 직접 설명해도 돼.</p><button type="button" class="btn btn-primary" onclick="copySummary()" style="margin-top:12px">📋 요약문 복사하기</button></div>`;
   if(showToSet.size>0){html+=`<div class="card"><h3>👁 보여주고 싶은 사람</h3>${[...showToSet].map(s=>`<span class="chip selected" style="cursor:default">${esc(s)}</span>`).join(' ')}<p style="font-size:0.82rem;color:var(--text-sub);margin-top:10px">준비가 되었을 때, 요약문과 함께 보여줄 수 있어.</p></div>`}
-  html+=`<div class="card"><h3>💾 백업 &amp; 내보내기</h3><p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px">⚠ 중요한 기록은 정기적으로 백업해줘. 폰을 바꾸거나 브라우저 데이터가 삭제되면 기록이 사라질 수 있어.</p><p style="font-size:0.78rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">내보낸 파일은 다운로드 폴더에 평문으로 남을 수 있어. 다른 사람이 기기를 볼 가능성이 있다면, 안전한 곳으로 옮긴 뒤 필요에 따라 기기에서 삭제해줘.</p><button type="button" class="btn btn-primary" onclick="exportText()">📄 텍스트 내보내기 (.txt)</button><button type="button" class="btn btn-primary" onclick="exportJSON()" style="margin-top:8px">💾 데이터 백업 (.json)</button><button type="button" class="btn btn-primary" onclick="importJSON()" style="margin-top:8px">📂 백업 파일 가져오기</button><input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)"></div>`;
+  html+=`<div class="card"><h3>💾 백업 &amp; 내보내기</h3><p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px">⚠ 중요한 기록은 정기적으로 백업해줘. 폰을 바꾸거나 브라우저 데이터가 삭제되면 기록이 사라질 수 있어.</p><p style="font-size:0.78rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">기록은 지금 쓰는 브라우저 안에만 저장돼. 크롬에서 쓴 기록은 사파리나 카카오톡 화면에서는 보이지 않아. 브라우저나 기기를 바꿀 때는 백업 파일을 내보낸 뒤 새 브라우저에서 가져오기로 옮기면 돼.</p><p style="font-size:0.78rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">내보낸 파일은 다운로드 폴더에 평문으로 남을 수 있어. 다른 사람이 기기를 볼 가능성이 있다면, 안전한 곳으로 옮긴 뒤 필요에 따라 기기에서 삭제해줘.</p><button type="button" class="btn btn-primary" onclick="exportText()">📄 텍스트 내보내기 (.txt)</button><button type="button" class="btn btn-primary" onclick="exportJSON()" style="margin-top:8px">💾 데이터 백업 (.json)</button><button type="button" class="btn btn-primary" onclick="importJSON()" style="margin-top:8px">📂 백업 파일 가져오기</button><input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)"></div>`;
   $('panel-summary').innerHTML=html;
 }
 function genSummary(count,firstDate,lastDate,topPlaces,topPersons,mainEmotions,recentRecords){
@@ -662,6 +759,7 @@ document.addEventListener('DOMContentLoaded',function(){
     document.body.innerHTML='<div style="padding:40px;text-align:center;font-family:sans-serif;color:#333"><h2 style="margin-bottom:16px">지원되지 않는 환경이에요</h2><p>이 앱은 브라우저의 보안 기능(Web Crypto API)이 필요해요.<br>최신 브라우저(Chrome, Safari, Edge, Firefox)를 사용해주세요.<br><br>기존 기록은 삭제되지 않았어요.</p></div>';
     return;
   }
+  showEnvNoticeIfNeeded();
   const auth=getAuth();
   if(!auth){showOnly('lock-setup')}else{showOnly('lock-login')}
   $('login-pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
