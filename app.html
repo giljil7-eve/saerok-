@@ -677,7 +677,7 @@ function renderSummary(){
   const bodyCount={};records.forEach(r=>(r.body||[]).forEach(b=>bodyCount[b]=(bodyCount[b]||0)+1));
   const topBody=Object.entries(bodyCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
   const showToSet=new Set();records.forEach(r=>{if(r.showTo)splitPersons(r.showTo).forEach(s=>{if(s&&s!=='아직 없음')showToSet.add(s)})});
-  const recentRecords=sortRecordsDesc(records).slice(0,3);
+  const recentRecords=sortRecordsDesc(records).slice(0,5);
   const mainEmotions=Object.entries(emotionCount).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>EMOTION_LABELS[k]||k);
   const summaryText=genSummary(records.length,firstDate,lastDate,topPlaces,topPersons,mainEmotions,recentRecords);
   let html=`<div class="info-banner">이 일은 네 탓이라고 단정할 수 없어. 기록은 너를 탓하려는 게 아니라, 네가 겪은 일을 잃어버리지 않기 위한 거야.</div>`;
@@ -697,10 +697,12 @@ function genSummary(count,firstDate,lastDate,topPlaces,topPersons,mainEmotions,r
   if(topPlaces.length)t+=`주요 장소: ${topPlaces.map(([p,c])=>`${p}(${c}회)`).join(', ')}\n`;
   if(topPersons.length)t+=`관련 인물: ${topPersons.map(([p,c])=>`${p}(${c}회)`).join(', ')}\n`;
   if(mainEmotions.length)t+=`주된 감정: ${mainEmotions.join(', ')}\n`;
-  t+=`\n--- 최근 기록 요약 ---\n`;
+  const shown=Math.min(recentRecords.length,count);
+  t+=count>shown?`\n--- 최근 기록 요약 (전체 ${count}건 중 최근 ${shown}건) ---\n`:`\n--- 기록 요약 (전체 ${count}건) ---\n`;
   recentRecords.forEach((r,i)=>{const ca=r.createdAt?formatDateTime(r.createdAt):(typeof r.id==='number'&&r.id>1e12?formatDateTime(new Date(r.id).toISOString()):'');t+=`\n[${i+1}] ${r.date}${r.time?' '+r.time:''}${r.place?' / '+r.place:''}${ca?' (저장: '+ca+')':''}\n${r.event.slice(0,100)}${r.event.length>100?'...':''}\n`});
   const helpTexts=recentRecords.filter(r=>r.help).map(r=>r.help);
   if(helpTexts.length)t+=`\n필요한 도움: ${helpTexts[0]}\n`;
+  if(count>shown)t+=`\n위 목록은 최근 ${shown}건만 옮긴 것이며, 전체 ${count}건은 텍스트 내보내기(.txt) 파일에 모두 들어 있습니다.\n`;
   t+=`\n---\n이 기록은 누군가를 단정하거나 처벌하기 위한 판단문이 아닙니다. 반복된 경험을 정리해 안전한 도움을 요청하기 위한 자료입니다.`;
   return t;
 }
@@ -715,7 +717,7 @@ function exportText(){
   let t='=== 사라지지 않는 기록 ===\n내보내기 날짜: '+new Date().toLocaleDateString('ko-KR')+'\n\n';
   records.forEach((r,i)=>{t+=`--- 기록 ${i+1} ---\n날짜: ${r.date}${r.time?' '+r.time:''}\n`;if(r.place)t+=`장소: ${r.place}\n`;t+=`있었던 일: ${r.event}\n`;if(r.person)t+=`관련 사람: ${r.person}\n`;if(r.witness)t+=`목격자: ${r.witness}\n`;if(r.evidence&&r.evidence!=='없음')t+=`증거: ${r.evidence}\n`;if(r.emotions&&r.emotions.length)t+=`감정: ${r.emotions.join(', ')}\n`;if(r.body&&r.body.length)t+=`몸의 반응: ${r.body.join(', ')}\n`;if(r.help)t+=`필요한 도움: ${r.help}\n`;if(r.showTo)t+=`보여주고 싶은 사람: ${r.showTo}\n`;const ca=r.createdAt?formatDateTime(r.createdAt):(typeof r.id==='number'&&r.id>1e12?formatDateTime(new Date(r.id).toISOString()):'');if(ca)t+=`최초 저장: ${ca}\n`;if(r.updatedAt)t+=`마지막 수정: ${formatDateTime(r.updatedAt)}\n`;t+='\n'});
   t+='---\n이 기록은 누군가를 단정하거나 처벌하기 위한 판단문이 아닙니다.\n반복된 경험을 정리해 안전한 도움을 요청하기 위한 자료입니다.\n';
-  dlFile(t,'기록_'+new Date().toISOString().slice(0,10)+'.txt','text/plain');
+  dlFile('\uFEFF'+t,'기록_'+new Date().toISOString().slice(0,10)+'.txt','text/plain');
 }
 function exportJSON(){const records=getRecords();if(!records.length){alert('백업할 기록이 없어.');return}dlFile(JSON.stringify({version:1,exported:new Date().toISOString(),records},null,2),'백업_'+new Date().toISOString().slice(0,10)+'.json','application/json');setBackupMeta({lastBackupAt:new Date().toISOString(),lastBackupRecordCount:records.length});renderSummary()}
 function dlFile(content,filename,type){const blob=new Blob([content],{type:type+';charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)}
