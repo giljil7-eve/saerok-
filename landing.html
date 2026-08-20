@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="겪은 일을 잃어버리지 않기 위한 기록용 웹앱, 사라지지 않는 기록">
+<title>사라지지 않는 기록 - 따뜻한 마음을 지켜주는 기록 친구</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+:root {
+  --bg: #faf6ef;
+  --bg-soft: #fffaf2;
+  --card: #ffffff;
+  --text: #2d3b2d;
+  --text-sub: #5a6b5a;
+  --text-light: #8a8a7a;
+  --green-dark: #3f6f4c;
+  --green: #6ea277;
+  --green-light: #a8c99b;
+  --green-pale: #e8f3e9;
+  --green-bg: #f0f7eb;
+  --mint: #e8f7f1;
+  --cream: #fff3d8;
+  --cream-border: #efdcae;
+  --border: #e2ddd4;
+  --shadow: 0 8px 28px rgba(74,103,65,0.08);
+  --shadow-hover: 0 12px 36px rgba(74,103,65,0.14);
+  --radius: 24px;
+  --radius-sm: 14px;
+  --max: 1000px;
+}
+body {
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at top, var(--bg-soft), var(--bg) 42%);
+  color: var(--text); line-height: 1.7; overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+.container { width: min(calc(100% - 32px), var(--max)); margin: 0 auto; }
+
+/* 헤더 */
+.site-header { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(14px); background: color-mix(in srgb, var(--bg) 88%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+.nav { min-height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { font-weight: 800; color: var(--green-dark); letter-spacing: -0.03em; font-size: 1rem; }
+.nav-links { display: none; gap: 20px; color: var(--text-sub); font-size: 0.88rem; }
+.nav-links a:hover { color: var(--green-dark); }
+.nav-cta { padding: 9px 16px; border-radius: 999px; background: var(--green); color: #fff; font-weight: 700; font-size: 0.85rem; transition: all 0.2s; }
+.nav-cta:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+/* 히어로 */
+.hero { padding: 64px 0 48px; }
+.hero-card { background: linear-gradient(135deg, var(--card), var(--green-pale)); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 24px; box-shadow: var(--shadow); display: grid; gap: 28px; align-items: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--mint); color: var(--green-dark); font-size: 0.82rem; font-weight: 700; margin-bottom: 16px; }
+.hero h1 { font-size: clamp(2.2rem, 8vw, 3.5rem); line-height: 1.15; letter-spacing: -0.04em; color: var(--green-dark); }
+.hero-sub { margin: 10px 0 16px; color: var(--text-sub); font-size: clamp(0.95rem, 2.5vw, 1.15rem); }
+.hero-copy { font-size: 0.92rem; max-width: 560px; color: var(--text-sub); line-height: 1.8; }
+.hero-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 13px; font-weight: 800; font-size: 0.92rem; border: 1px solid transparent; transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; }
+.btn:hover { transform: translateY(-2px); }
+.btn-primary { background: var(--green); color: #fff; box-shadow: 0 8px 20px rgba(110,162,119,0.25); }
+.btn-primary:hover { background: var(--green-dark); }
+.btn-secondary { background: var(--card); border-color: var(--border); color: var(--green-dark); }
+.hero-visual { min-height: 260px; display: grid; place-items: center; border-radius: 20px; background: color-mix(in srgb, var(--card) 65%, transparent); border: 1px dashed color-mix(in srgb, var(--green) 40%, var(--border)); overflow: hidden; padding: 20px; }
+.hero-visual img { max-height: 280px; object-fit: contain; }
+
+/* 섹션 */
+.section { padding: 72px 0; }
+.section-title { font-size: clamp(1.6rem, 4.5vw, 2.2rem); margin: 0 0 12px; letter-spacing: -0.03em; text-align: center; color: var(--green-dark); font-weight: 900; }
+.section-lead { max-width: 680px; margin: 0 auto 32px; text-align: center; color: var(--text-sub); font-size: 0.95rem; }
+.section-badge { display: inline-block; background: var(--green-dark); color: #fff; padding: 5px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-bottom: 12px; text-align: center; width: fit-content; margin-left: auto; margin-right: auto; }
+
+/* why */
+.why-card { max-width: 780px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 24px; box-shadow: var(--shadow); font-size: 0.95rem; line-height: 1.9; }
+
+/* features */
+.grid { display: grid; gap: 16px; }
+.feature-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 22px; box-shadow: var(--shadow); transition: all 0.3s; }
+.feature-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+.feature-icon { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--green-pale); margin-bottom: 12px; font-size: 1.3rem; }
+.feature-card h3 { margin: 0 0 6px; color: var(--green-dark); font-size: 1rem; }
+.feature-card p { margin: 0; color: var(--text-sub); font-size: 0.85rem; }
+
+/* steps */
+.steps { counter-reset: step; }
+.step-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 22px; box-shadow: var(--shadow); position: relative; overflow: hidden; transition: all 0.3s; }
+.step-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px); }
+.step-card::before { counter-increment: step; content: counter(step); position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--green); color: #fff; font-weight: 800; font-size: 0.8rem; }
+.step-character { width: 80px; height: 80px; object-fit: contain; margin-bottom: 12px; }
+.step-card h3 { margin: 0 0 6px; color: var(--green-dark); font-size: 1rem; }
+.step-card p { margin: 0; color: var(--text-sub); font-size: 0.85rem; }
+.step-phrase { margin-top: 12px !important; padding: 9px 12px; border-radius: 10px; background: var(--green-pale); color: var(--green-dark) !important; font-weight: 700; font-size: 0.82rem !important; }
+
+/* safety */
+.safety-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); max-width: 700px; margin: 0 auto; }
+.safety-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.safety-list li { padding: 12px 14px; border-radius: 10px; background: var(--green-pale); color: var(--green-dark); font-weight: 600; font-size: 0.9rem; }
+
+/* emergency */
+.emergency { background: var(--cream); border: 1px solid var(--cream-border); border-radius: var(--radius-sm); padding: 22px; color: #5a4010; font-weight: 700; font-size: 0.92rem; box-shadow: var(--shadow); max-width: 700px; margin: 0 auto; line-height: 1.7; }
+
+/* character */
+.character-wrap { display: grid; gap: 24px; align-items: center; }
+.character-image { min-height: 240px; display: grid; place-items: center; border-radius: var(--radius-sm); background: var(--green-pale); border: 1px dashed var(--green); padding: 20px; }
+.character-image img { max-height: 240px; object-fit: contain; }
+.character-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 24px; box-shadow: var(--shadow); }
+.character-card h3 { margin: 0 0 8px; color: var(--green-dark); font-size: 1.2rem; }
+.character-card p { margin: 0; color: var(--text-sub); font-size: 0.9rem; line-height: 1.7; }
+.character-traits { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.character-trait { padding: 6px 12px; border-radius: 20px; background: var(--green-pale); color: var(--green-dark); font-size: 0.78rem; font-weight: 600; }
+
+/* trust */
+.trust-grid { display: grid; gap: 16px; max-width: 700px; margin: 0 auto; }
+.trust-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px; display: flex; align-items: flex-start; gap: 14px; box-shadow: var(--shadow); }
+.trust-icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--green-pale); font-size: 1.3rem; flex-shrink: 0; }
+.trust-item h4 { font-size: 0.92rem; color: var(--green-dark); margin-bottom: 4px; }
+.trust-item p { font-size: 0.82rem; color: var(--text-sub); margin: 0; }
+
+/* final cta */
+.final-cta { text-align: center; background: linear-gradient(135deg, var(--green-pale), var(--card)); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 24px; box-shadow: var(--shadow); }
+.final-cta h2 { margin: 0 0 10px; color: var(--green-dark); font-size: clamp(1.3rem, 3.5vw, 1.7rem); font-weight: 900; }
+.final-cta p { margin: 0 auto 22px; max-width: 520px; color: var(--text-sub); font-size: 0.92rem; }
+
+/* footer */
+footer { padding: 36px 0 48px; color: var(--text-sub); text-align: center; font-size: 0.82rem; line-height: 1.8; }
+
+/* animation */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* 접근성: 모션 감소 */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: none; opacity: 1; transform: none; }
+  .btn, .feature-card, .step-card, .nav-cta { transition: none; }
+}
+
+/* 접근성: 포커스 표시 */
+a:focus-visible, button:focus-visible, .btn:focus-visible, .nav-cta:focus-visible {
+  outline: 3px solid var(--green);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 접근성: 긴 단어·URL 줄바꿈 */
+body { word-break: keep-all; overflow-wrap: break-word; }
+.why-card, .feature-card p, .step-card p, .character-card p,
+.trust-item p, .safety-list li, .emergency, .hero-copy, .section-lead,
+.final-cta p { overflow-wrap: break-word; word-break: keep-all; }
+
+/* leaf deco */
+.leaf-deco { position: fixed; pointer-events: none; z-index: -1; opacity: 0.05; }
+.leaf-1 { top: 8%; right: 4%; font-size: 5rem; transform: rotate(15deg); }
+.leaf-2 { top: 45%; left: 2%; font-size: 3.5rem; transform: rotate(-25deg); }
+.leaf-3 { bottom: 15%; right: 6%; font-size: 4rem; transform: rotate(40deg); }
+
+/* responsive */
+@media (min-width: 700px) {
+  .nav-links { display: flex; }
+  .hero-card { grid-template-columns: 1.2fr 0.8fr; padding: 48px 36px; }
+  .hero-actions { flex-direction: row; }
+  .features { grid-template-columns: repeat(2, 1fr); }
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+  .character-wrap { grid-template-columns: 0.8fr 1.2fr; }
+  .trust-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 980px) {
+  .features { grid-template-columns: repeat(5, 1fr); }
+  .steps-grid { grid-template-columns: repeat(5, 1fr); }
+  .step-card { min-height: 300px; }
+}
+@media (max-width: 480px) {
+  .hero-card { padding: 24px 18px; }
+  .section { padding: 56px 0; }
+}
+@media (max-width: 768px) {
+  .section { padding: 52px 0; }
+  .section-title { margin-bottom: 8px; }
+  .section-lead { margin-bottom: 24px; }
+  .hero { padding: 48px 0 36px; }
+  .why-card { padding: 22px 20px; }
+  .safety-card { padding: 20px; }
+  .final-cta { padding: 32px 20px; }
+  .trust-item { padding: 16px; }
+  .feature-card { padding: 18px; }
+  .step-card { padding: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- 데코 잎사귀 -->
+<div class="leaf-deco leaf-1">🍃</div>
+<div class="leaf-deco leaf-2">🌿</div>
+<div class="leaf-deco leaf-3">🍀</div>
+
+<!-- 헤더 -->
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="#top">🌱 사라지지 않는 기록</a>
+    <nav class="nav-links" aria-label="주요 메뉴">
+      <a href="#why">왜 기록할까</a>
+      <a href="#features">기능</a>
+      <a href="#how">5단계 기록</a>
+      <a href="#safety">안전 원칙</a>
+      <a href="#character">새록 소개</a>
+    </nav>
+    <a class="nav-cta" href="app.html">앱 열기</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- 히어로 -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-card reveal">
+      <div>
+        <span class="eyebrow">🌱 조용히 남기고, 천천히 정리하는 기록</span>
+        <h1>사라지지 않는<br>기록</h1>
+        <p class="hero-sub">겪은 일을 잃어버리지 않기 위한 기록</p>
+        <p class="hero-copy">
+          지우고 싶었던 순간도, 말하지 못한 마음도 여기에 안전하게 담아둘 수 있어요.<br>
+          남기는 모든 기록은 소중하고, 사라지지 않는 나만의 이야기가 됩니다.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="app.html">기록 시작하기</a>
+          <a class="btn btn-secondary" href="#how">기록 흐름 보기</a>
+        </div>
+      </div>
+      <div>
+        <div class="hero-visual">
+          <img src="새록5_품은.png" alt="기록을 품은 새록 캐릭터">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 왜 기록할까 -->
+<section id="why" class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">왜 기록이 필요할까요?</span>
+    <h2 class="section-title">작은 일도 반복되면, 흐름이 보여요</h2>
+    <div class="why-card" style="text-align:left;">
+      괴롭힘은 언제나 한 번의 큰 사건으로 시작되지 않습니다. 작은 말, 불편한 행동, 애매한 상황이 반복되며 점점 커질 수 있습니다.<br><br>
+      그 과정에서 "이게 괴롭힘이 맞나?", "내가 예민한 건가?"라고 생각하기 쉽습니다.<br><br>
+      <strong style="color:var(--green-dark);">기록은 판단을 서두르기 위한 것이 아니라, 반복되는 흐름을 놓치지 않기 위한 출발점입니다.</strong><br><br>
+      이 앱은 누군가를 탓하거나 신고를 강요하는 앱이 아니라, 내가 겪은 일을 조용히 남기고 도움을 요청할 준비를 돕는 기록용 앱입니다.
+    </div>
+  </div>
+</section>
+
+<!-- 주요 기능 -->
+<section id="features" class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">주요 기능</span>
+    <h2 class="section-title">기록이 쌓이면, 흐름이 보여요</h2>
+    <p class="section-lead">혼자 기억하려 애쓰지 않아도 되도록, 필요한 내용을 차분히 남기고 정리해요.</p>
+    <div class="grid features">
+      <article class="feature-card"><div class="feature-icon">📅</div><h3>날짜별 기록</h3><p>날짜, 시간, 장소, 있었던 일을 남길 수 있어요.</p></article>
+      <article class="feature-card"><div class="feature-icon">💭</div><h3>감정과 몸의 반응</h3><p>무서움, 불안, 억울함, 잠을 못 잔 것, 손 떨림 같은 반응도 함께 남길 수 있어요.</p></article>
+      <article class="feature-card"><div class="feature-icon">🔎</div><h3>반복 패턴 확인</h3><p>반복되는 장소, 사람, 감정, 몸의 반응을 정리해서 보여줘요.</p></article>
+      <article class="feature-card"><div class="feature-icon">📋</div><h3>도움 요청용 요약</h3><p>보호자, 상담자, 선생님에게 보여줄 수 있는 요약문을 만들어요.</p></article>
+      <article class="feature-card"><div class="feature-icon">🔒</div><h3>기기 안 저장</h3><p>기록은 서버로 전송되지 않고, 기기 브라우저 안에만 저장돼요.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- 5단계 기록 흐름 -->
+<section id="how" class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">앱 이용 흐름 5단계</span>
+    <h2 class="section-title">기록은 5단계로 천천히</h2>
+    <p class="section-lead">한 번에 많은 질문을 보지 않아도 돼요. 한 단계씩, 기억나는 만큼만 적어요.</p>
+    <div class="grid steps steps-grid">
+      <article class="step-card" style="text-align:left;">
+        <img class="step-character" src="새록1_생각.png" alt="생각하는 새록">
+        <h3>언제, 어디서</h3>
+        <p>날짜와 시간, 장소를 남겨요.</p>
+        <p class="step-phrase">천천히 떠올려도 괜찮아.</p>
+      </article>
+      <article class="step-card" style="text-align:left;">
+        <img class="step-character" src="새록2_안아줌.png" alt="마음을 안아주는 새록">
+        <h3>무슨 일이 있었는지</h3>
+        <p>기억나는 방식대로 적어요.</p>
+        <p class="step-phrase">완벽하게 쓰지 않아도 돼.</p>
+      </article>
+      <article class="step-card" style="text-align:left;">
+        <img class="step-character" src="새록3_기록.png" alt="기록하는 새록">
+        <h3>그때 내 상태</h3>
+        <p>감정과 몸의 반응도 함께 살펴요.</p>
+        <p class="step-phrase">네 마음도 함께 적어도 괜찮아.</p>
+      </article>
+      <article class="step-card" style="text-align:left;">
+        <img class="step-character" src="새록4_함께.png" alt="함께 생각하는 새록">
+        <h3>지금 필요한 것</h3>
+        <p>도움이나 보여주고 싶은 사람을 생각해요.</p>
+        <p class="step-phrase">지금 필요한 걸 생각해봐.</p>
+      </article>
+      <article class="step-card" style="text-align:left;">
+        <img class="step-character" src="새록5_품은.png" alt="기록을 품은 새록">
+        <h3>저장 전 확인</h3>
+        <p>전체 내용을 천천히 다시 봐요.</p>
+        <p class="step-phrase">준비되면 저장해도 돼.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 캐릭터 소개 -->
+<section id="character" class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">기록 친구</span>
+    <h2 class="section-title">새록을 소개할게요</h2>
+    <p class="section-lead">기록을 재촉하지 않고, 천천히 떠올릴 수 있도록 곁에 있어주는 친구예요.</p>
+    <div class="character-wrap">
+      <div class="character-image">
+        <img src="새록5_품은.png" alt="기록 친구 새록">
+      </div>
+      <article class="character-card" style="text-align:left;">
+        <span class="eyebrow">🌿 캐릭터 소개</span>
+        <h3>새록</h3>
+        <p>
+          새록은 기록을 재촉하지 않고, 사용자가 천천히 떠올릴 수 있도록 곁에 있어주는 기록 친구입니다.<br><br>
+          성격: 차분하고 다정함<br>
+          특징: 각 단계에서 짧은 말로 사용자를 안내해요.<br>
+          소중한 기록을 안전하게 지켜주는 친구예요.
+        </p>
+        <div class="character-traits">
+          <span class="character-trait">차분한</span>
+          <span class="character-trait">다정한</span>
+          <span class="character-trait">기다려주는</span>
+          <span class="character-trait">안전한</span>
+          <span class="character-trait">기록을 지켜주는</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- 안심 포인트 -->
+<section class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">안심 포인트</span>
+    <h2 class="section-title">안심하고 사용해도 돼요</h2>
+    <p class="section-lead">기록은 지금 사용하는 브라우저 안에만 저장돼요.</p>
+    <div class="grid trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon">📱</div>
+        <div style="text-align:left;"><h4>기기 내 저장</h4><p>서버에 전송되지 않아요. 브라우저에만 보관돼요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🔐</div>
+        <div style="text-align:left;"><h4>비밀번호 잠금</h4><p>다른 사람이 열어도 바로 보이지 않아요. 급할 때 바로 잠글 수 있어요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🌱</div>
+        <div style="text-align:left;"><h4>네 속도대로</h4><p>강요하지 않아요. 준비될 때까지 기다려요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">💾</div>
+        <div style="text-align:left;"><h4>백업 가능</h4><p>필요할 때 텍스트 내보내기나 데이터 백업으로 따로 보관할 수 있어요. 브라우저나 기기를 바꿀 때 기록을 옮기는 방법도 이 백업 파일이에요.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 안전 원칙 -->
+<section id="safety" class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">안전 원칙</span>
+    <h2 class="section-title">이 앱이 하지 않는 것</h2>
+    <p class="section-lead">판단하거나 몰아붙이기보다, 기록을 안전하게 남기고 도움을 준비하는 데 집중해요.</p>
+    <div class="safety-card" style="text-align:left;">
+      <ul class="safety-list">
+        <li>학폭 여부를 판정하지 않습니다.</li>
+        <li>누군가를 가해자로 단정하지 않습니다.</li>
+        <li>신고를 강요하지 않습니다.</li>
+        <li>법적 또는 의료적 조언을 하지 않습니다.</li>
+        <li>기록을 외부로 자동 전송하지 않습니다.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 긴급 연락 -->
+<section class="section">
+  <div class="container reveal">
+    <div class="emergency">
+      ⚠ 지금 당장 위험하거나 다칠 것 같다면, 기록보다 먼저 주변 어른이나 아래 번호에 도움을 요청해 주세요.<br><br>
+      📞 112 (경찰) &nbsp;|&nbsp; 📞 117 (학교폭력 신고) &nbsp;|&nbsp; 📞 1388 (청소년 상담)
+    </div>
+  </div>
+</section>
+
+<!-- 마지막 CTA -->
+<section class="section">
+  <div class="container reveal">
+    <div class="final-cta">
+      <h2>어떤 마음도 적어도 괜찮아.<br>여기는 네 기록을 안전하게 남기는 곳이야.</h2>
+      <p>기억나는 만큼만, 천천히 시작해도 돼요. 이 앱은 내가 겪은 일을 잃어버리지 않기 위한 기록입니다.</p>
+      <a class="btn btn-primary" href="app.html">지금 기록 시작하기</a>
+    </div>
+  </div>
+</section>
+
+<!-- 설계 원칙 -->
+<section class="section">
+  <div class="container reveal" style="text-align:center;">
+    <span class="section-badge">설계 원칙</span>
+    <h2 class="section-title">안전과 통제를 먼저 생각한 설계</h2>
+    <p class="section-lead">이 앱은 기록을 많이 모으는 것보다, 사용자가 자신의 기록을 스스로 통제할 수 있도록 만드는 것을 먼저 생각했습니다.</p>
+    <div class="grid trust-grid">
+      <div class="trust-item">
+        <div class="trust-icon">⚖️</div>
+        <div style="text-align:left;"><h4>내용을 대신 판단하지 않아요</h4><p>괴롭힘인지, 누구의 잘못인지, 신고해야 하는지를 앱이 대신 결론 내리지 않아요. 기록하고 정리하는 것까지만 도와요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">📎</div>
+        <div style="text-align:left;"><h4>증거 파일을 직접 저장하지 않아요</h4><p>사진, 녹음, 메시지 원본은 앱 안에 저장하지 않아요. 어떤 자료가 있는지만 표시해요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🏷️</div>
+        <div style="text-align:left;"><h4>실명 대신 별칭을 사용할 수 있어요</h4><p>화면 노출 시 바로 식별되는 가능성을 낮추기 위해 이니셜이나 별칭을 사용할 수 있어요. 상담자에게 보여줄 때는 누구를 뜻하는지 따로 설명하면 돼요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🚫</div>
+        <div style="text-align:left;"><h4>기록은 서버로 자동 전송되지 않아요</h4><p>기록은 사용 중인 브라우저에 저장돼요. 다른 사람이나 운영자에게 자동 전송되지 않아요. 같은 주소라도 브라우저가 다르면 기록이 이어지지 않으니, 한 브라우저를 정해 사용하고 옮길 때는 백업 파일을 쓰세요.</p></div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon">🔓</div>
+        <div style="text-align:left;"><h4>잠금 기능의 한계를 숨기지 않아요</h4><p>잠금은 우연한 열람을 줄이는 간이 기능이에요. 기록 본문 전체가 강하게 암호화되는 것은 아니에요. 공용 기기에서는 주의가 필요해요.</p></div>
+      </div>
+    </div>
+
+    <!-- 검토자용: 설계 판단 자세히 보기 -->
+    <details style="text-align:left; margin-top:32px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:20px; box-shadow:var(--shadow);">
+      <summary style="cursor:pointer; font-weight:700; color:var(--green-dark); font-size:0.92rem;">이 앱의 설계 판단 자세히 보기</summary>
+      <p style="font-size:0.8rem; color:var(--text-sub); margin:12px 0 16px; line-height:1.6;">상담자, 보호자, 강사, 검토자를 위한 설계 근거 요약입니다.</p>
+      <table style="width:100%; border-collapse:collapse; font-size:0.8rem; line-height:1.6;">
+        <thead><tr style="border-bottom:2px solid var(--border);"><th style="text-align:left; padding:8px 6px; color:var(--green-dark);">설계 결정</th><th style="text-align:left; padding:8px 6px; color:var(--green-dark);">이유</th></tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">인증 전 전체 초기화 기능 제거</td><td style="padding:8px 6px;">비밀번호를 모르는 제3자가 기록 내용은 보지 못하면서 전체 기록만 삭제하는 상황을 막기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">급히 화면 가리기는 잠그기와 새로고침으로 구현</td><td style="padding:8px 6px;">기록을 파괴하지 않으면서 현재 화면을 빠르게 가리기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">증거 파일 원본을 저장하지 않음</td><td style="padding:8px 6px;">민감한 사진, 녹음, 메시지 파일이 앱 안에 추가로 남는 위험을 줄이기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">실명 대신 별칭 사용 권장</td><td style="padding:8px 6px;">화면을 본 제3자가 관련 사람을 즉시 식별하는 가능성을 낮추기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">잠금을 '간이 잠금'이라고 설명</td><td style="padding:8px 6px;">실제보다 강한 보안이나 완전한 암호화를 약속하지 않기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">기록을 서버로 자동 전송하지 않음</td><td style="padding:8px 6px;">사용자의 기록을 외부 서버에 모으지 않고 기기 안에서 관리하기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">백업은 사용자가 직접 내보내기</td><td style="padding:8px 6px;">자동 전송 없이도 기기 변경과 데이터 손실에 대비할 수 있게 하기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">판정, 신고, 가해자 단정을 하지 않음</td><td style="padding:8px 6px;">앱이 사용자의 판단과 선택을 대신하지 않고 기록과 정리를 돕는 범위에 머물기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">휴지통이나 장기 보관 기능 없음</td><td style="padding:8px 6px;">지운 줄 알았는데 기록이 남아 있는 상황이 새로운 노출 위험이 될 수 있기 때문</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">사건 날짜와 저장 시각을 구분</td><td style="padding:8px 6px;">사용자가 기억한 사건 시점과 앱에 기록한 시점을 구분해 기록의 맥락을 남기기 위해서</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">기록을 브라우저별로 분리해 보관</td><td style="padding:8px 6px;">기기 안 저장을 택한 결과로, 같은 주소라도 브라우저가 다르면 기록이 이어지지 않음. 옮길 때는 백업 파일 내보내기와 가져오기를 사용</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">인앱 브라우저에서 열면 안내 표시</td><td style="padding:8px 6px;">메신저 앱 안에서 열린 화면은 저장 공간이 따로 분리되어, 나중에 일반 브라우저로 열었을 때 기록이 보이지 않기 때문</td></tr>
+          <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px 6px;">증거로서의 효력은 보장하지 않음</td><td style="padding:8px 6px;">별칭 사용과 원본 미저장을 택한 결과로, 제3자가 기록만으로 대상을 특정하기 어려움. 절차에 활용할지는 어른과 상의가 필요</td></tr>
+        </tbody>
+      </table>
+    </details>
+  </div>
+</section>
+
+</main>
+
+<!-- 푸터 -->
+<footer>
+  <div class="container">
+    사라지지 않는 기록 — 겪은 일을 잃어버리지 않기 위한 기록<br>
+    생각하고 설계한 사람: 결 (Gyeol)<br>
+    Claude와 ChatGPT의 도움을 받아, Kiro와 함께 제작
+  </div>
+</footer>
+
+<!-- 스크롤 등장 애니메이션 -->
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
