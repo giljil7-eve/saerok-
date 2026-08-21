@@ -528,7 +528,7 @@ function renderStep(){
       <div class="warn-banner">⚠ 지금 당장 위험하다면, 기록보다 먼저 112, 117(학교폭력), 1388(청소년)에 도움을 요청해줘.</div>
       <div class="card"><h3>1단계. 언제, 어디서</h3>${mascotHTML(1)}
         <div class="form-group"><label>날짜</label><input type="date" id="f-date" value="${esc(d.date)||''}"></div>
-        <div class="form-group"><label>시간대 <span class="optional">(안 적어도 돼)</span></label><select id="f-time"><option value="">선택 안 함</option><option value="등교 전" ${d.time==='등교 전'?'selected':''}>등교 전 (아침)</option><option value="오전 수업" ${d.time==='오전 수업'?'selected':''}>오전 수업 중</option><option value="점심시간" ${d.time==='점심시간'?'selected':''}>점심시간</option><option value="오후 수업" ${d.time==='오후 수업'?'selected':''}>오후 수업 중</option><option value="방과 후" ${d.time==='방과 후'?'selected':''}>방과 후</option><option value="저녁" ${d.time==='저녁'?'selected':''}>저녁</option><option value="밤" ${d.time==='밤'?'selected':''}>밤</option><option value="온라인/SNS" ${d.time==='온라인/SNS'?'selected':''}>온라인/SNS</option></select></div>
+        <div class="form-group"><label>시간대 / 상황 <span class="optional">(안 적어도 돼)</span></label><select id="f-time"><option value="">선택 안 함</option><option value="등교 전" ${d.time==='등교 전'?'selected':''}>등교 전 (아침)</option><option value="오전 수업" ${d.time==='오전 수업'?'selected':''}>오전 수업 중</option><option value="점심시간" ${d.time==='점심시간'?'selected':''}>점심시간</option><option value="오후 수업" ${d.time==='오후 수업'?'selected':''}>오후 수업 중</option><option value="방과 후" ${d.time==='방과 후'?'selected':''}>방과 후</option><option value="저녁" ${d.time==='저녁'?'selected':''}>저녁</option><option value="밤" ${d.time==='밤'?'selected':''}>밤</option><option value="온라인/SNS" ${d.time==='온라인/SNS'?'selected':''}>온라인/SNS</option></select></div>
         <div class="form-group"><label>장소 <span class="optional">(선택)</span></label><input type="text" id="f-place" value="${esc(d.place)}" placeholder="교실, 복도, 운동장, 화장실, 온라인..."></div>
         <div class="step-nav"><button type="button" class="btn btn-primary" onclick="nextStep()">다음 →</button></div>
       </div>`;
@@ -557,7 +557,7 @@ function renderStep(){
   }else if(funnelStep===5){
     html=`${indicator}<div class="card"><h3>5단계. 저장 전 확인</h3>${mascotHTML(5)}
         <p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px">아래 내용을 확인하고 저장해줘.</p>
-        <div class="confirm-section"><div class="confirm-label">날짜 / 시간대</div><div class="confirm-value">${esc(d.date)}${d.time?' · '+esc(d.time):' · 안 적음'}</div></div>
+        <div class="confirm-section"><div class="confirm-label">날짜 / 시간대·상황</div><div class="confirm-value">${esc(d.date)}${d.time?' · '+esc(d.time):' · 안 적음'}</div></div>
         <div class="confirm-section"><div class="confirm-label">장소</div><div class="confirm-value">${esc(d.place)||'안 적음'}</div></div>
         <div class="confirm-section"><div class="confirm-label">있었던 일</div><div class="confirm-value">${esc(d.event)||'안 적음'}</div></div>
         <div class="confirm-section"><div class="confirm-label">관련된 사람</div><div class="confirm-value">${esc(d.person)||'안 적음'}</div></div>
@@ -620,7 +620,7 @@ function saveFunnel(){
 // --- 타임라인 ---
 function renderTimeline(){
   const records=sortRecordsDesc(getRecords());
-  let html=`<div class="info-banner">기록이 쌓이면 흐름이 보여. 반복되는 패턴은 네 탓이 아닐 가능성을 보여줘.</div>`;
+  let html=`<div class="info-banner">기록이 쌓이면 흐름이 보여. 지금 바로 의미를 정하지 않아도 괜찮아.</div>`;
   if(records.length===0){
     html+='<div class="card"><div class="mascot-empty"><img src="새록3_기록.png" alt="기록하는 새록"><p style="color:var(--text-sub);font-size:0.85rem">아직 기록이 없어.<br>기록하기 탭에서 첫 기록을 남겨봐.</p></div></div>';
   }else{
@@ -636,7 +636,7 @@ function renderTimeline(){
         <div class="tl-summary">${esc(r.event)}</div>
         <div class="tl-tags">${emotionTags}${personTag}</div>
         <div class="tl-detail">
-          <div class="tl-detail-row"><div class="tl-detail-label">날짜 / 시간대</div><div class="tl-detail-value">${esc(r.date)}${r.time?' · '+esc(r.time):''}</div></div>
+          <div class="tl-detail-row"><div class="tl-detail-label">날짜 / 시간대·상황</div><div class="tl-detail-value">${esc(r.date)}${r.time?' · '+esc(r.time):''}</div></div>
           ${r.place?`<div class="tl-detail-row"><div class="tl-detail-label">장소</div><div class="tl-detail-value">${esc(r.place)}</div></div>`:''}
           <div class="tl-detail-row"><div class="tl-detail-label">있었던 일</div><div class="tl-detail-value">${esc(r.event)}</div></div>
           ${r.person?`<div class="tl-detail-row"><div class="tl-detail-label">관련된 사람</div><div class="tl-detail-value">${esc(r.person)}</div></div>`:''}
@@ -669,7 +669,7 @@ function deleteRecord(idx){if(!confirm('이 기록을 삭제할까? 삭제하면
 const EMOTION_LABELS={'무서웠다':'무서움','화가 났다':'화남','슬펐다':'슬픔','억울했다':'억울함','창피했다':'창피함','불안했다':'불안함','혼란스러웠다':'혼란','무기력했다':'무기력','외로웠다':'외로움','아무것도 느끼지 못했다':'무감각'};
 function renderSummary(){
   const records=getRecords();
-  if(records.length===0){$('panel-summary').innerHTML=`<div class="info-banner">이 일은 네 탓이라고 단정할 수 없어. 기록은 너를 탓하려는 게 아니라, 네가 겪은 일을 잃어버리지 않기 위한 거야.</div><div class="card"><div class="mascot-empty"><img src="새록5_품은.png" alt="기록을 지켜주는 새록"><p style="color:var(--text-sub);font-size:0.85rem">기록이 쌓이면 여기에 요약이 표시돼.</p></div></div><div class="card"><h3>📂 백업 파일 가져오기</h3><p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">다른 브라우저나 기기에서 쓰던 기록이 있다면, 그곳에서 내보낸 백업 파일(.json)을 여기로 가져올 수 있어.</p><button type="button" class="btn btn-primary" onclick="importJSON()">📂 백업 파일 가져오기</button></div>`;return}
+  if(records.length===0){$('panel-summary').innerHTML=`<div class="info-banner">지금 바로 의미를 정하지 않아도 괜찮아. 기록이 쌓이면 반복되는 흐름을 다시 살펴볼 수 있어.</div><div class="card"><div class="mascot-empty"><img src="새록5_품은.png" alt="기록을 지켜주는 새록"><p style="color:var(--text-sub);font-size:0.85rem">기록이 쌓이면 여기에 요약이 표시돼.</p></div></div><div class="card"><h3>📂 백업 파일 가져오기</h3><p style="font-size:0.82rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">다른 브라우저나 기기에서 쓰던 기록이 있다면, 그곳에서 내보낸 백업 파일(.json)을 여기로 가져올 수 있어.</p><button type="button" class="btn btn-primary" onclick="importJSON()">📂 백업 파일 가져오기</button></div>`;return}
   const sorted=[...records].sort((a,b)=>a.date.localeCompare(b.date));
   const firstDate=sorted[0].date,lastDate=sorted[sorted.length-1].date;
   const placeCount={};records.forEach(r=>{if(r.place)placeCount[r.place]=(placeCount[r.place]||0)+1});
@@ -684,7 +684,7 @@ function renderSummary(){
   const recentRecords=sortRecordsDesc(records).slice(0,5);
   const mainEmotions=Object.entries(emotionCount).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>EMOTION_LABELS[k]||k);
   const summaryText=genSummary(records.length,firstDate,lastDate,topPlaces,topPersons,mainEmotions,recentRecords);
-  let html=`<div class="info-banner">이 일은 네 탓이라고 단정할 수 없어. 기록은 너를 탓하려는 게 아니라, 네가 겪은 일을 잃어버리지 않기 위한 거야.</div>`;
+  let html=`<div class="info-banner">지금 바로 의미를 정하지 않아도 괜찮아. 기록이 쌓이면 반복되는 흐름을 다시 살펴볼 수 있어.</div>`;
   if(shouldShowBackupHint()){html+=`<div class="backup-hint"><span>💾 마지막 백업 이후 새 기록이 쌓였어. 중요한 기록을 따로 보관해두는 게 좋아.</span><button type="button" class="btn btn-primary" onclick="exportJSON()">지금 백업하기</button></div>`}
   html+=`<div class="card"><h3>📊 전체 기록 현황</h3><div class="stat-row"><span class="stat-label">기록 건수</span><span class="stat-value">${records.length}건</span></div><div class="stat-row"><span class="stat-label">기간</span><span class="stat-value">${esc(firstDate)} ~ ${esc(lastDate)}</span></div></div>
     <div class="card"><h3>📍 반복되는 장소</h3>${topPlaces.length?topPlaces.map(([p,c])=>`<div class="stat-row"><span class="stat-label">${esc(p)}</span><span class="stat-value">${c}회</span></div>`).join(''):'<p style="font-size:0.83rem;color:var(--text-sub)">아직 장소 데이터가 부족해.</p>'}</div>
@@ -723,7 +723,7 @@ function exportText(){
   t+='---\n이 기록은 누군가를 단정하거나 처벌하기 위한 판단문이 아닙니다.\n반복된 경험을 정리해 안전한 도움을 요청하기 위한 자료입니다.\n';
   dlFile('\uFEFF'+t,'기록_'+new Date().toISOString().slice(0,10)+'.txt','text/plain');
 }
-function exportJSON(){const records=getRecords();if(!records.length){alert('백업할 기록이 없어.');return}dlFile(JSON.stringify({version:1,exported:new Date().toISOString(),records},null,2),'백업_'+new Date().toISOString().slice(0,10)+'.json','application/json');setBackupMeta({lastBackupAt:new Date().toISOString(),lastBackupRecordCount:records.length});renderSummary()}
+function exportJSON(){const records=getRecords();if(!records.length){alert('백업할 기록이 없어.');return}dlFile(JSON.stringify({version:1,appType:'youth',exported:new Date().toISOString(),records},null,2),'백업_'+new Date().toISOString().slice(0,10)+'.json','application/json');setBackupMeta({lastBackupAt:new Date().toISOString(),lastBackupRecordCount:records.length});renderSummary()}
 function dlFile(content,filename,type){const blob=new Blob([content],{type:type+';charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url)}
 function importJSON(){markFilePickerOpen();$('import-file').click()}
 
@@ -755,6 +755,7 @@ function handleImport(event){
     try{
       const data=JSON.parse(e.target.result);
       if(!data||typeof data!=='object'||!Array.isArray(data.records)){alert('올바른 백업 파일이 아닌 것 같아.');return}
+      if(data.appType&&data.appType!=='youth'){const ok=confirm('이 백업 파일은 학생용 새록에서 내보낸 파일이 아닌 것 같아. 다른 버전의 백업을 가져오면 일부 내용이 다르게 보이거나 제외될 수 있어. 그래도 가져올까?');if(!ok)return}
       const existing=getRecords();const ids=new Set(existing.map(r=>String(r.id)));
       let added=0,skipped=0;
       data.records.forEach(r=>{
